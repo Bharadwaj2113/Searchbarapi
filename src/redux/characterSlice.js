@@ -1,16 +1,11 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
+import { fetchCharacterData } from './actions/characterActions';
 
 // Create an async thunk for fetching character data
 export const fetchCharacter = createAsyncThunk(
   'character/fetchCharacter',
   async (name) => {
-    try {
-      const response = await axios.get(`https://narutodb.xyz/api/character/search?name=${name}`);
-      return response.data; // Assuming the API response contains character data
-    } catch (error) {
-      throw new Error('Character not found'); // Handle errors appropriately
-    }
+    return await fetchCharacterData(name); // Use the imported function
   }
 );
 
@@ -21,7 +16,13 @@ const characterSlice = createSlice({
     status: 'idle',
     error: null,
   },
-  reducers: {},
+  reducers: {
+    resetCharacterState: (state) => {
+      state.character = null;
+      state.status = 'idle';
+      state.error = null;
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(fetchCharacter.pending, (state) => {
@@ -38,4 +39,5 @@ const characterSlice = createSlice({
   },
 });
 
+export const { resetCharacterState } = characterSlice.actions; // Export the reset action
 export default characterSlice.reducer;
